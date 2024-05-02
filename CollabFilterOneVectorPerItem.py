@@ -88,6 +88,8 @@ class CollabFilterOneVectorPerItem(AbstractBaseCollabFilterSGD):
         yhat_N = ag_np.ones(N)
         user_biases = b_per_user[user_id_N]
         item_biases = c_per_item[item_id_N]
+        print("U shape:", U.shape)
+        print("V shape:", V.shape)
         user_factor_items = U[user_id_N]#[:,:self.n_factors]
         item_factor_items = V[item_id_N]#[:,:self.n_factors]
         # ag_np.set_printoptions(threshold=ag_np.inf, linewidth=ag_np.inf)
@@ -101,8 +103,11 @@ class CollabFilterOneVectorPerItem(AbstractBaseCollabFilterSGD):
         # print(user_factor_items)
         # print("item factors:")
         # print(item_factor_items)
-        factor_mult = user_factor_items * item_factor_items
+        print("user_factor_items:", user_factor_items.shape)
+        print("item_factor_items:", item_factor_items.shape)
+        factor_mult = ag_np.multiply(user_factor_items, item_factor_items)
         factor_sum = ag_np.sum(factor_mult, axis=1)
+        print("factor_sum:", factor_sum.shape)
         yhat_N = mu + user_biases + item_biases + factor_sum
         if ag_np.isnan(yhat_N).any():
             print("yhat_N:")
