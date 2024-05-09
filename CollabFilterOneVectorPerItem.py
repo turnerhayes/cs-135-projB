@@ -81,59 +81,16 @@ class CollabFilterOneVectorPerItem(AbstractBaseCollabFilterSGD):
             Scalar predicted ratings, one per provided example.
             Entry n is for the n-th pair of user_id, item_id values provided.
         '''
-        # print("user_id_N shape:", user_id_N.shape)
-        # print("item_id_N shape:", item_id_N.shape)
         # TODO: Update with actual prediction logic
         N = user_id_N.size
         yhat_N = ag_np.ones(N)
         user_biases = b_per_user[user_id_N]
         item_biases = c_per_item[item_id_N]
-        print("U shape:", U.shape)
-        print("V shape:", V.shape)
-        user_factor_items = U[user_id_N]#[:,:self.n_factors]
-        item_factor_items = V[item_id_N]#[:,:self.n_factors]
-        # ag_np.set_printoptions(threshold=ag_np.inf, linewidth=ag_np.inf)
-        # if ag_np.isnan(user_biases).any():
-        #     print("user biases:")
-        #     print(user_biases)
-        # if ag_np.isnan(item_biases).any():
-        #     print("item biases:")
-        #     print(item_biases)
-        # print("user factors:")
-        # print(user_factor_items)
-        # print("item factors:")
-        # print(item_factor_items)
-        print("user_factor_items:", user_factor_items.shape)
-        print("item_factor_items:", item_factor_items.shape)
+        user_factor_items = U[user_id_N]
+        item_factor_items = V[item_id_N]
         factor_mult = ag_np.multiply(user_factor_items, item_factor_items)
         factor_sum = ag_np.sum(factor_mult, axis=1)
-        print("factor_sum:", factor_sum.shape)
         yhat_N = mu + user_biases + item_biases + factor_sum
-        if ag_np.isnan(yhat_N).any():
-            print("yhat_N:")
-            print(yhat_N)
-        # for i in range(N):
-        #     user_index = int(user_id_N[i])
-        #     item_index = int(item_id_N[i])
-            
-        #     user_bias = b_per_user[user_index] if user_index in b_per_user else 0
-        #     item_bias = c_per_item[item_index] if item_index in c_per_item else 0
-        #     user_factors = U[user_index]
-        #     item_factors = V[item_index]
-        #     np_user_factors = np.asarray(user_factors._value if hasattr(user_factors, "_value") else user_factors)
-        #     np_item_factors = np.asarray(item_factors._value if hasattr(item_factors, "_value") else item_factors)
-        #     # print("Numpy user factors:")
-        #     # print(np_user_factors)
-        #     factors_sum = np.sum(np_user_factors * np_item_factors)
-        #     yhat = mu + user_bias + item_bias + factors_sum
-        #     if hasattr(yhat, "_value"):
-        #         # print("yhat:")
-        #         # print(yhat)
-        #         yhat = yhat._value[0]
-        #         print("yhat value:")
-        #         print(yhat)
-            
-        #     yhat_N[i] = yhat
             
         return yhat_N
 
@@ -163,13 +120,6 @@ class CollabFilterOneVectorPerItem(AbstractBaseCollabFilterSGD):
         user_factors = U[user_id_N]
         item_factors = V[item_id_N]
         yhat_N = self.predict(data_tuple[0], data_tuple[1], **param_dict)
-        # loss = ag_np.sum((y_N - yhat_N)**2)
-        # # Small optimization to avoid doing unnecessary work when alpha is 0
-        # if self.alpha != 0:
-        #     loss = loss + self.alpha * (
-        #         ag_np.sum(user_biases**2) + ag_np.sum(item_biases**2) +
-        #             ag_np.sum(user_factors**2) +
-        #             ag_np.sum(item_factors**2)
         loss = ag_np.sum((y_N - yhat_N)**2) + self.alpha * (
             ag_np.sum(user_biases**2) + ag_np.sum(item_biases**2) +
                 ag_np.sum(user_factors**2) +
